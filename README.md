@@ -4,27 +4,20 @@
 
 > pip install odds
 
-import the 'OD' object by
-
+THe work is done by the **OD** object. Import the 'OD' object as follows:
 
 > from odds import OD
 
-Contains an OD object
-
-Instantiate the object with the 'algo' argument
+Instantiate the object with the 'algo' argument, where a short string represents the algorithm you wish to use. In this case, 'VAR' refers to vector autoregression, a simple linear multidimensional regression algorithm. Other implemented algorithms are listed below.
 
 > od = OD('VAR')
 
-This instantiates an outlier detection system using vector autoregression
-
-get outlier scores using the 'get_os()' function
+To use the object, you need to call the 'get_os()' function, with 'X' as its argument, where X is a data matrix, **n** samples by **p** features. **p must be 2 or greater to work**
+on many of the systems, this returns a vector with n scores, one for each sample.
 
 > outlier_scores = od.get_os(X)
 
-Where X is a data matrix, n samples by p features. **p must be 2 or greater to work**
-on many of the systems, this returns a vector with n scores, one for each sample.
-
-Higher numbers mean more outlying.
+The higher scores are the more outlying. you can then set a threshold if you wish, or just look at the ranking. Scores have not been sanitised, they may contain 'nan' values particularly from the 'VAE' if the data input has not been scaled. However it seems other algorithms work better without scaling, so inputs are not scaled. 
 
 
 Valid strings for outlier algorithms:
