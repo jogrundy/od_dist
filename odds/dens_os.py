@@ -12,7 +12,7 @@ def get_OCSVM_os(X, kernel='rbf', nu=0.5):
     return dists
 
 def get_IF_os(X, n_estimators=100):
-    clf = IsolationForest(n_estimators=n_estimators, contamination='auto', behaviour='new')
+    clf = IsolationForest(n_estimators=n_estimators, contamination='auto')
     clf.fit(X)
     os = clf.decision_function(X)*-1 # average number splits to isolation. small is outlier.
     return os

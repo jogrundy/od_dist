@@ -1,25 +1,14 @@
-# VAE on MNIST
+"""
+builds VAE and provides outlier score with get_VAE_os
+"""
 import torch
-import torchvision
 from torch import nn
 from torch import optim
-# import torch.nn.functional as F
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
-from torchvision import transforms
-from torchvision.utils import save_image
-
 import os
 import numpy as np
-import matplotlib.pyplot as plt
-from ae import SynDataset
-import argparse
-
-
-# def to_img(x):
-#     x = x.clamp(0, 1)
-#     x = x.view(x.size(0), 1, 28, 28)
-#     return x
+from .ae import SynDataset
 
 
 class VAE(nn.Module):
@@ -115,22 +104,19 @@ def get_losses(model, dataset, params, device):
     """
 
     n,p,r, p_frac, p_quant,gamma, ta, num_epochs = params
-
     model.eval()
     loader = DataLoader(dataset, batch_size=1)
     losses = []
     for i,data in enumerate(loader):
         data = Variable(data).to(device)
         # ===================forward=====================
-
         output, mu , logvar = model(data)
         loss = model.loss_fn(data, output, mu, logvar)
+        #======== Get outlier score =================#
+        losses.append(loss.detach().numpy())
 
-
-        losses.append(loss)
-    # print(np.array(losses, dtype='float')[:10])
     losses = np.array(losses, dtype='float')
-        # np.savetxt(loss_fname, losses)
+
     return losses
 
 def get_vae_losses(X):
@@ -176,95 +162,3 @@ def get_VAE_os(X):
     """
     losses = get_vae_losses(X)
     return losses
-
-if __name__ == '__main__':
-    from torchvision.datasets import MNIST
-    os.makedirs("vae_img", exist_ok=True)
-
-    num_epochs = 2
-    batch_size = 128
-    learning_rate = 1e-3
-
-    img_transform = transforms.Compose([
-        transforms.ToTensor()
-        # transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-    ])
-
-    dataset = MNIST('./data', transform=img_transform, download=True)
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
-
-    criterion = nn.MSELoss(size_average=False)
-    layers = [784,400,20]
-    model = VAE(layers, criterion)
-    print(model)
-    if torch.cuda.is_available():
-        model.cuda()
-
-    # reconstruction_function = nn.MSELoss(size_average=False)
-
-
-
-
-
-    optimizer = optim.Adam(model.parameters(), lr=1e-3)
-
-    for epoch in range(num_epochs):
-        model.train()
-        train_loss = 0
-        for batch_idx, data in enumerate(dataloader):
-            img, _ = data
-            img = img.view(img.size(0), -1)
-            img = Variable(img)
-            if torch.cuda.is_available():
-                img = img.cuda()
-            optimizer.zero_grad()
-            output, mu, logvar = model(img)
-            loss = model.loss_fn(img, output, mu, logvar)
-            loss.backward()
-            train_loss += loss.data
-            optimizer.step()
-            if batch_idx % 100 == 0:
-                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                    epoch,
-                    batch_idx * len(img),
-                    len(dataloader.dataset), 100. * batch_idx / len(dataloader),
-                    loss.data / len(img)))
-
-        print('====> Epoch: {} Average loss: {:.4f}'.format(
-            epoch, train_loss / len(dataloader.dataset)))
-        if epoch % 10 == 0:
-            save = to_img(output.cpu().data)
-            save_image(save, './vae_img/image_{}.png'.format(epoch))
-
-    dataloader_test = DataLoader(dataset, batch_size=1, shuffle=False)
-    losses = []
-
-    for i , data in enumerate(dataloader_test):
-
-        img, o = data
-        # print(i, o)
-        img = img.view(img.size(0), -1)
-        img = Variable(img)
-        # ===================forward=====================
-        if torch.cuda.is_available():
-            img = img.cuda()
-        optimizer.zero_grad()
-        recon_batch, mu, logvar = model(img)
-        loss = model.loss_fn(recon_batch, img, mu, logvar)
-
-        losses.append(loss)
-    losses = np.array(losses)
-    k = 5
-    worst = losses.argsort()[-k:][::-1]
-    plt.figure(figsize=(8,3))
-    for i in range(k):
-        idx = worst[i]
-        plt.subplot(1,k,i+1)
-        img = dataset[idx][0].reshape(28,28)
-        cls = dataset[idx][1]
-        plt.axis('off')
-        plt.imshow(img, cmap='Greys')
-
-        plt.title('loss={:.1f}, {}'.format(losses[idx], cls))
-    plt.savefig('./images/highest_losses_vae.eps',bbox_inches='tight')
-    plt.show()

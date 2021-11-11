@@ -5,8 +5,6 @@ from time import time
 import platform
 
 import numpy as np
-import pandas as pd
-
 
 import torch
 import torch.nn as nn
@@ -16,7 +14,7 @@ from torch.utils.data import TensorDataset, DataLoader
 from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import MinMaxScaler
 
-import gc
+# import gc
 
 #started with code from https://blog.floydhub.com/gru-with-pytorch/
 #then massively refactored.
@@ -33,6 +31,7 @@ class GRUNet(nn.Module):
         self.gru = nn.GRU(input_dim, hidden_dim, n_layers, batch_first=True, dropout=drop_prob)
         self.fc = nn.Linear(hidden_dim, output_dim)
         self.relu = nn.ReLU()
+        self.criterion=nn.MSELoss()
 
     def forward(self, x, h):
         out, h = self.gru(x, h)
@@ -50,6 +49,7 @@ class LSTMNet(nn.Module):
         self.hidden_dim = hidden_dim
         self.n_layers = n_layers
         self.device = device
+        self.criterion=nn.MSELoss()
 
         self.lstm = nn.LSTM(input_dim, hidden_dim, n_layers, batch_first=True, dropout=drop_prob)
         self.fc = nn.Linear(hidden_dim, output_dim)
@@ -82,7 +82,6 @@ def train(train_loader, learn_rate, device, batch_size, in_dim, out_dim, hidden_
     model.to(device)
 
     # Defining loss function and optimizer
-    criterion = nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=learn_rate)
 
 
@@ -103,7 +102,7 @@ def train(train_loader, learn_rate, device, batch_size, in_dim, out_dim, hidden_
             model.zero_grad()
 
             out, h = model(x.to(device).float(), h)
-            loss = criterion(out, label.to(device).float())
+            loss = model.criterion(out, label.to(device).float())
             loss.backward()
             optimizer.step()
             avg_loss += loss.item()
@@ -112,7 +111,7 @@ def train(train_loader, learn_rate, device, batch_size, in_dim, out_dim, hidden_
 
         epoch_times.append(t1)
     if device =='cuda':
-        gc.collect()
+        # gc.collect()
         torch.cuda.empty_cache()
     tt = sum(epoch_times)
 
@@ -156,15 +155,11 @@ def model_eval(model, data_loader, targets, scaler, device):
             h = model.init_hidden(batch_size)
 
             out, _ = model(input.float(), h)
-            if scaler:
+            loss = model.criterion(out, label)
 
-                pred = scaler.inverse_transform(out.detach().numpy())
-                label = scaler.inverse_transform(label)
-                score = ese(pred, label)
-            else:
-                pred = out.detach().numpy()
-                label = label.detach().numpy()
-                score = ese(pred, label)
+            pred = out.detach().numpy()[0]
+            label = label.detach().numpy()[0]
+            score = loss.detach().numpy().item(0)
 
             scores.append(score)
             preds.append(pred)

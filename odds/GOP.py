@@ -8,15 +8,10 @@ by Omar Shetta
 
 import numpy as np
 import numpy.linalg as la
-import pandas as pd
-import matplotlib.pyplot as plt
 from scipy.sparse import issparse
-from scipy.sparse.linalg import svds, spsolve, lsqr
-from scipy.sparse import csr_matrix, dia_matrix, identity
-# from scipy.linalg import solve_banded
+from scipy.sparse.linalg import svds
 
 def graph_reg_OP(X, lamb, gamma, phi):
-    #phi is diagnoally sparse matrix dia_matrix
     eta=0.000001
     p, n = X.shape
     L_k = np.random.randn(p,n)
@@ -29,7 +24,7 @@ def graph_reg_OP(X, lamb, gamma, phi):
     Z2_k = W_k - L_k
     P1_k = nuclear_norm(L_k)
     P2_k = lamb*sum(np.sqrt(np.sum(S_k**2, axis=0)))
-    P3_k =  gamma*np.trace(L_k.dot(phi.dot(L_k.T)))
+    P3_k =  gamma*np.trace(np.dot(L_k, np.dot(phi, L_k.T)))
     converged=False
     count=0
     r1_k = 1
@@ -39,10 +34,12 @@ def graph_reg_OP(X, lamb, gamma, phi):
     obj_func_kp1 = []
     while not converged:
         count=count+1;
+        # print('GOP iteration =', count)
         H_1 = X - S_k + (Z1_k/r1_k)
         H_2 = W_k + (Z2_k/r2_k)
         A = (r1_k * H_1 + r2_k * H_2) / (r1_k + r2_k)
         r_k = (r1_k + r2_k)/2
+
         L_kp1 = prox_nuc_norm(A, 1/r_k)
         S_kp1 = column_thresh((X - L_kp1 + (Z1_k/r1_k)), lamb/r1_k)
 
@@ -54,7 +51,7 @@ def graph_reg_OP(X, lamb, gamma, phi):
 
         P1_kp1 = nuclear_norm(L_kp1)
         P2_kp1 = lamb*sum(np.sqrt(sum(S_kp1**2)))
-        P3_kp1 = gamma*np.trace(L_kp1.dot(phi.dot(L_kp1.T))) #scalar
+        P3_kp1 = gamma*np.trace(np.dot(L_kp1, np.dot(phi, L_kp1.T)))
 
         obj_func_kp1.append(P1_kp1 + P2_kp1 + P3_kp1)
 
@@ -80,13 +77,6 @@ def graph_reg_OP(X, lamb, gamma, phi):
             rel_err_z2 = la.norm(Z2_kp1 - Z2_k,'fro')**2 / (la.norm(Z2_k,'fro')**2)
         else:
             rel_err_z2 = 0
-        # print(P1_kp1, P1_k)
-        # print(P2_kp1, P2_k)
-        # print(P3_kp1, P3_k)
-        # print(rel_err_z1, rel_err_z2)
-        # print('+++++++++++++++++')
-        # if count == 100:
-        #     raise
         within_tol = rel_err_1<eta and rel_err_2<eta and rel_err_3<eta and rel_err_z1<eta and rel_err_z2<eta
         if within_tol or count==maxiter:
             converged=True
@@ -106,14 +96,9 @@ def graph_reg_OP(X, lamb, gamma, phi):
     return L_hat, S_hat, obj_func_kp1
 
 def GOP_tweak(gamma, phi, r2_k, n, L_kp1, Z2_k):
-    # print('phi is sparse? {}'.format(issparse(phi)))
-    A = (gamma * phi + (r2_k* identity(n, format='dia')) ).T
+    A = (gamma * phi + (r2_k* np.identity(n)) ).T
     B = (L_kp1 - (Z2_k/r2_k)).T
-    # print('A is sparse? {}'.format(issparse(A)))
-    # print(A.shape)
-    # print(B.shape)
-    XT = spsolve(A, B)
-    # XT, istop, itn, normr = lsqr(A, B)[:4]
+    XT = la.solve(A, B)
     return XT.T
 
 def prox_nuc_norm(X, eps):
@@ -143,14 +128,12 @@ def column_thresh(C, eps):
 def nuclear_norm(x):
     """
     sum of singular values
-    function n = norm_nuclear(x)
-    %NORM_NUCLEAR - Nuclear norm of x
-    %   Usage: norm_nuclear(x)
-    %
-    %   Input parameters
-    %       x       : a matrix
-    %   Output parameters
-    %       n       : nuclear norm of x
+    Nuclear norm of x
+       Usage: norm_nuclear(x)
+       Input parameters
+           x       : a matrix
+       Output parameters
+          n       : nuclear norm of x
     """
     if issparse(x):
         u, s, vt = svds(x, np.min(size(x)))
@@ -160,17 +143,15 @@ def nuclear_norm(x):
 
 def knn_graph(X,k):
     """
-    function  [Lap,W]=build_knn_graph(X,k)
-    %%%%%%%%%%%%
-    %%% This function computes the K-Nearest Neighbour graph.
-    %%% Inputs:
-    %%% X, is the data matrix with dimension (n x m) n is the number of samples and m is the number of features.
-    %%% k, is a scalar that defines the number of nearest neighbours.
-    %%%
-    %%% Outputs:
-    %%% Lap, is the graph Laplacian matrix of the k-nearest neighbour graph. It is an (n x n) symmetric positive semi-definite matrix.
-    %%% W, is the Weight matrix. It is an (n x n) symmetric matrix. It holds the weight of each edge of the k-nearest neighbour graph.
-    %%%%%%%%%%%%
+    from matlab version:
+    This function computes the K-Nearest Neighbour graph.
+    Inputs:
+    X, is the data matrix with dimension (n x m) n is the number of samples and m is the number of features.
+    k, is a scalar that defines the number of nearest neighbours.
+
+    Outputs:
+    Lap, is the graph Laplacian matrix of the k-nearest neighbour graph. It is an (n x n) symmetric positive semi-definite matrix.
+    W, is the Weight matrix. It is an (n x n) symmetric matrix. It holds the weight of each edge of the k-nearest neighbour graph.
     """
     K = k+1 #as don't want to include self in neighbours
     n,p = X.shape
@@ -178,44 +159,37 @@ def knn_graph(X,k):
     W = np.zeros((n,n))
     D = np.zeros((n,n))
     dists = np.zeros((n,n))
-
     for i in range(n):
-        s_ind = max(0,i-k)
-        e_ind = min(n, i+k+1)
-        for j in range(s_ind,e_ind):
+        for j in range(n):
             d = la.norm(X[i,:] - X[j,:],2)
             dists[i,j] = d
 
-        # inds = np.argpartition(dists[i,:], K)
-        # dists[i,inds[K:]] = 0
+        inds = np.argpartition(dists[i,:], K)
+        dists[i,inds[K:]] = 0
 
     # calculate weights for nonzero values
     nz = np.nonzero(dists)
     const = (np.sum(dists[:])/(K*n))**2
     W[nz] = np.exp(-(dists[nz]**2)/const)
-    # symmetrise - very unlikely to be symmetric
+    # symmetrise
     W = (W+W.T)/2
     # calculate laplacian matrix
     d = np.sum(W, axis=1)
     D = np.diag(d)
-    # D = dia_matrix(D)
-    laplacian = dia_matrix(D - W)
-    return laplacian #, W
+    laplacian = np.array(D - W)
+    return laplacian, W
 
 
-def SGOP(M, lamb, gamma):
+def GOP(M, lamb, gamma):
     k = min(M.shape[1]-2, 5)
-    # print(k)
-    phi= knn_graph(M.T, k)
+    phi, W = knn_graph(M.T, k)
     L_hat, S_hat, ob_fn = graph_reg_OP(M, lamb, gamma, phi)
     return S_hat
 
-def get_SGOP_os(X, lamb=0.5, alpha=0.1):
+def get_GOP_os(X, lamb=0.5, alpha=0.1):
+    """
+    to tie in to outlier detection object
+    """
     M = X.T
-    S_hat = SGOP(M, lamb, alpha)
+    S_hat = GOP(M, lamb, alpha)
     return np.sum(S_hat, axis=0)
-
-
-
-if __name__=='__main__':
-    pass

@@ -80,10 +80,3 @@ def fps(est_out_scores, outs):
             fps = len(np.setdiff1d(inds[:i], outs)) #count the things in inds not in outs
             return fps/i
     return 1
-
-if __name__ == '__main__':
-    arr = np.array([np.inf, -np.inf, np.nan, 10, 2, 3, -4, -40])
-    outs = [0,2,3,6]
-    arr = np.array([np.inf, -np.inf, np.inf, np.nan])
-    # arr = sanitise_scores(arr)
-    print(auc(arr, outs))

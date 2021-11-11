@@ -1,7 +1,7 @@
 #python implementation of autoregression AR for time series prediction, just using OLS
 import numpy as np
 import numpy.linalg as la
-from utils import ese
+from .utils import ese
 from sklearn.model_selection import train_test_split
 from sklearn import linear_model
 """

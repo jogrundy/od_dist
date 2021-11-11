@@ -2,17 +2,18 @@
 refactoring outlier score code
 """
 
+# import numpy as np
+
+from .reg_os import get_VAR_os, get_OLS_os, get_ridge_os, get_LASSO_os
+from .dens_os import get_OCSVM_os, get_IF_os, get_GMM_os, get_DBSCAN_os
+from .gru import get_GRU_os, get_LSTM_os
+from .outlier_pursuit import get_OP_os
+from .GOP import get_GOP_os
+from .ae import get_AE_os
+from .vae import get_VAE_os
+
+# from utils import sanitise_scores
 import numpy as np
-from reg_os import get_VAR_os, get_OLS_os, get_ridge_os, get_LASSO_os
-from dens_os import get_OCSVM_os, get_IF_os, get_GMM_os, get_DBSCAN_os
-from gru import get_GRU_os, get_LSTM_os
-from outlier_pursuit import get_OP_os
-from admm_graph_OP_tweak import get_GOP_os
-from ae import get_AE_os
-from vae import get_VAE_os
-
-from utils import sanitise_scores
-
 def rand_os(X):
     """
     to give a true baseline for the algorithms.
