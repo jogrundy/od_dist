@@ -4,7 +4,7 @@
 
 > pip install odds
 
-THe work is done by the **OD** object. Import the 'OD' object as follows:
+The work is done by the **OD** object. Import the 'OD' object as follows:
 
 > from odds import OD
 
@@ -17,23 +17,28 @@ on many of the systems, this returns a vector with n scores, one for each sample
 
 > outlier_scores = od.get_os(X)
 
-The higher scores are the more outlying. you can then set a threshold if you wish, or just look at the ranking. Scores have not been sanitised, they may contain 'nan' values particularly from the 'VAE' if the data input has not been scaled. However it seems other algorithms work better without scaling, so inputs are not scaled. 
+The higher scores are the more outlying. you can then set a threshold if you wish, or just look at the ranking. Scores have not been sanitised, they may contain 'nan' values particularly from the 'VAE' if the data input has not been scaled. However it seems other algorithms work better without scaling, so inputs are not automatically scaled.
+
+Hyperparameters for each of these algorithms are currently fixed to the values in my paper, however at some point I will be finishing implementing a pass though allowing you to specify the hyperparameters at instantiation. This is on my ToDo list.
 
 
 Valid strings for outlier algorithms:
 
-- 'VAR' vector autoregression
-- 'FRO' ordinary feature regression
-- 'FRL' LASSO feature regression
-- 'FRR' Ridge feature regression
+- 'VAR' Vector Autoregression
+- 'FRO' Ordinary Feature Regression
+- 'FRL' LASSO Feature Regression
+- 'FRR' Ridge Feature Regression
 - 'GMM' Gaussian Mixture model
-- 'IF' isolation Forest
-- 'DBSCAN' Density Based Spatial clustering and noise
-- 'OCSVM' one class support vector machine
-- 'LSTM' long short term memory
-- 'GRU' gated recurrent unit
-- 'AE' autoencoder
-- 'VAE' variational autoencoder
-- 'OP' outlier pursuit
-- 'GOP' graph regularised outlier pursuit
-- 'RAND' random scoring (for baseline comparison)
+- 'IF' Isolation Forest
+- 'DBSCAN' Density Based Spatial Clustering and Noise
+- 'OCSVM' One Class Support Vector Machine
+- 'LSTM' Long Short Term Memory
+- 'GRU' Gated Recurrent Unit
+- 'AE' Autoencoder
+- 'VAE' Variational Autoencoder
+- 'OP' Outlier Pursuit
+- 'GOP' Graph Regularised Outlier Pursuit
+- 'RAND' Random scoring (for baseline comparison)
+
+Hyperparameter table
+![Hyperparameter table](/table_hyperparamters.png)
