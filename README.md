@@ -43,5 +43,5 @@ Valid strings for outlier algorithms:
 Hyperparameter table
 
 <p align="center">
-<img  src="table_hyperparamters.png" width="800" height="400" >
+<img  src="/images/table_hyperparamters.png" width="800" height="400" >
 </p>
