@@ -41,4 +41,7 @@ Valid strings for outlier algorithms:
 - 'RAND' Random scoring (for baseline comparison)
 
 Hyperparameter table
-![Hyperparameter table](table_hyperparamters.png)
+
+<p align="center">
+<img  src="table_hyperparamters.png" width="800" height="400" > 
+</p>
