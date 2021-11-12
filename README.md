@@ -42,4 +42,8 @@ Valid strings for outlier algorithms:
 
 [Hyperparameter table](https://github.com/jogrundy/od_dist/blob/table_hyperparameter.png)
 
-[Hyperparameter table](/table_hyperparameter.png)
+[Hyperparameter table](images/table_hyperparameters.png)
+
+https://github.com/jogrundy/od_dist/blob/ff179e7d32bf9eddd25c851a2cf38be742910cd5/images/table_hyperparameters.png
+
+images/table_hyperparameters.png
