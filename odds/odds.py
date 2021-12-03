@@ -2,7 +2,7 @@
 refactoring outlier score code
 """
 
-# import numpy as np
+import numpy as np
 
 from .reg_os import get_VAR_os, get_OLS_os, get_ridge_os, get_LASSO_os
 from .dens_os import get_OCSVM_os, get_IF_os, get_GMM_os, get_DBSCAN_os
@@ -11,9 +11,8 @@ from .outlier_pursuit import get_OP_os
 from .GOP import get_GOP_os
 from .ae import get_AE_os
 from .vae import get_VAE_os
+from .utils import normalise
 
-# from utils import sanitise_scores
-import numpy as np
 def rand_os(X):
     """
     to give a true baseline for the algorithms.
@@ -37,12 +36,14 @@ class OD():
         self.params = params
         self.algo_str = algo
 
-    def get_os(self, data):
+    def get_os(self, data, norm=False):
         """
         data must be in form n samples by p features
         will return a score for each sample, array length n.
         """
         self.algo = OD.algo_dict[self.algo_str]
         os = self.algo(data, *self.params)
+        if norm:
+            os = normalise(os)
         # os = sanitise_scores(os)
         return os

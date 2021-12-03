@@ -80,3 +80,15 @@ def fps(est_out_scores, outs):
             fps = len(np.setdiff1d(inds[:i], outs)) #count the things in inds not in outs
             return fps/i
     return 1
+
+def normalise(X):
+    """
+    here I mean make max 1 and min 0 and fit everything else in.
+    should be by feature.
+    X is np array
+    returns X shame shape but normalised by feature.
+    """
+    n,p = X.shape
+    for column in range(p):
+        X[:,column] = ((X[:,column] - np.max(X[:,column])) / (np.max(X[:,column]) - np.min(X[:,column])))+1
+    return X

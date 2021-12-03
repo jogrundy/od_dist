@@ -21,6 +21,10 @@ The higher scores are the more outlying. you can then set a threshold if you wis
 
 Hyperparameters for each of these algorithms are currently fixed to the values in my paper, however at some point I will be finishing implementing a pass though allowing you to specify the hyperparameters at instantiation. This is on my ToDo list.
 
+To get normalised (between 0 and 1) scores, use the 'norm' keyword argument. This may result in errors if the data is not normalised, as there may be infinite values in the scores (usually only from the 'VAE').
+
+> normalised_scores = od.get_os(X, norm=True)
+
 
 Valid strings for outlier algorithms:
 
@@ -43,5 +47,3 @@ Valid strings for outlier algorithms:
 
 
 Hyperparameter table ![Hyperparameter table](images/table_hyperparameters.png)
-
-
