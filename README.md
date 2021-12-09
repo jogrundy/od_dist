@@ -1,4 +1,5 @@
-[![Build Status](https://travis-ci.com/jogrundy/od_dist.svg?branch=master)](https://travis-ci.com/jogrundy/od_dist)
+
+[![Build Status](https://app.travis-ci.com/jogrundy/od_dist.svg?branch=main)](https://app.travis-ci.com/jogrundy/od_dist)
 
 # Outlier Data Detection Systems - ODDS
 
