@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/jogrundy/od_dist.svg?branch=master)](https://travis-ci.com/jogrundy/od_dist)
+
 # Outlier Data Detection Systems - ODDS
 
 # As used in paper "Simple Models are Effective in Anomaly Detection in Multi-variate Time Series"
