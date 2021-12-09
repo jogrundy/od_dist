@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader, Dataset
 from torch import nn
 from torch.autograd import Variable
 import numpy.linalg as la
-from time import time, localtime
+from time import time
 
 
 
@@ -137,7 +137,7 @@ def get_losses(model, dataset, criterion, device):
         output = model(data)
         loss = criterion(data, output)
         # ========== get outlier score ============
-        losses.append(loss.detach().numpy())
+        losses.append(loss.detach().cpu().numpy())
     losses = np.array(losses, dtype='float')
     return losses
 

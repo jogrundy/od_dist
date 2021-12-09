@@ -92,3 +92,11 @@ def normalise(X):
     for column in range(p):
         X[:,column] = ((X[:,column] - np.max(X[:,column])) / (np.max(X[:,column]) - np.min(X[:,column])))+1
     return X
+
+def norm_score(X):
+    """
+    here I mean make max 1 and min 0 and fit everything else in.
+    1d for the score
+    """
+    X = ((X - np.max(X)) / (np.max(X) - np.min(X)))+1
+    return X

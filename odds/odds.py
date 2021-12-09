@@ -11,7 +11,7 @@ from .outlier_pursuit import get_OP_os
 from .GOP import get_GOP_os
 from .ae import get_AE_os
 from .vae import get_VAE_os
-from .utils import normalise
+from .utils import norm_score
 
 def rand_os(X):
     """
@@ -44,6 +44,6 @@ class OD():
         self.algo = OD.algo_dict[self.algo_str]
         os = self.algo(data, *self.params)
         if norm:
-            os = normalise(os)
+            os = norm_score(os)
         # os = sanitise_scores(os)
         return os

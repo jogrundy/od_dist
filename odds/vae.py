@@ -113,7 +113,7 @@ def get_losses(model, dataset, params, device):
         output, mu , logvar = model(data)
         loss = model.loss_fn(data, output, mu, logvar)
         #======== Get outlier score =================#
-        losses.append(loss.detach().numpy())
+        losses.append(loss.detach().cpu().numpy())
 
     losses = np.array(losses, dtype='float')
 
