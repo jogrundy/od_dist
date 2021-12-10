@@ -22,6 +22,9 @@ Requires-Python: >=3.6, <4
 Description-Content-Type: text/markdown
 License-File: LICENSE
 
+
+[![Build Status](https://app.travis-ci.com/jogrundy/od_dist.svg?branch=main)](https://app.travis-ci.com/jogrundy/od_dist)
+
 # Outlier Data Detection Systems - ODDS
 
 # As used in paper "Simple Models are Effective in Anomaly Detection in Multi-variate Time Series"
