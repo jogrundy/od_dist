@@ -11,8 +11,6 @@ import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
 
 
-from sklearn.metrics import mean_squared_error
-from sklearn.preprocessing import MinMaxScaler
 
 # import gc
 
@@ -116,27 +114,27 @@ def train(train_loader, learn_rate, device, batch_size, in_dim, out_dim, hidden_
     tt = sum(epoch_times)
 
     return model
+#
+# def evaluate(model, test_x, test_y, label_scalers):
+#     model.eval()
+#     outputs = []
+#     targets = []
+#     start_time = time()
+#     for i in test_x.keys():
+#         inp = torch.from_numpy(np.array(test_x[i]))
+#         labs = torch.from_numpy(np.array(test_y[i]))
+#         h = model.init_hidden(inp.shape[0])
+#         out, h = model(inp.to(device).float(), h)
+#         outputs.append(label_scalers[i].inverse_transform(out.cpu().detach().numpy()).reshape(-1))
+#         targets.append(label_scalers[i].inverse_transform(labs.numpy()).reshape(-1))
+#     t1 = time() - start_time
+#     sMAPE = 0
+#     for i in range(len(outputs)):
+#         sMAPE += np.mean(abs(outputs[i]-targets[i])/(targets[i]+outputs[i])/2)/len(outputs)
+#
+#     return outputs, targets, sMAPE
 
-def evaluate(model, test_x, test_y, label_scalers):
-    model.eval()
-    outputs = []
-    targets = []
-    start_time = time()
-    for i in test_x.keys():
-        inp = torch.from_numpy(np.array(test_x[i]))
-        labs = torch.from_numpy(np.array(test_y[i]))
-        h = model.init_hidden(inp.shape[0])
-        out, h = model(inp.to(device).float(), h)
-        outputs.append(label_scalers[i].inverse_transform(out.cpu().detach().numpy()).reshape(-1))
-        targets.append(label_scalers[i].inverse_transform(labs.numpy()).reshape(-1))
-    t1 = time() - start_time
-    sMAPE = 0
-    for i in range(len(outputs)):
-        sMAPE += np.mean(abs(outputs[i]-targets[i])/(targets[i]+outputs[i])/2)/len(outputs)
-
-    return outputs, targets, sMAPE
-
-def model_eval(model, data_loader, targets, scaler, device):
+def model_eval(model, data_loader, targets, device):
     """
     uses MSE to evaluate model
     """
@@ -195,14 +193,14 @@ def compile_data(data, tw, pad=False, test_split = 0.2):
 
     return train_x, train_y, inputs, targets
 
-def ese(pred, target):
-    """
-    takes in predicted values and actual values, returns elementwise squared error
-    via (x-y)^2
-    """
-    errs = (np.subtract(pred, target))**2
-    errs = np.sum(errs, axis=1)
-    return np.sqrt(errs)
+# def ese(pred, target):
+#     """
+#     takes in predicted values and actual values, returns elementwise squared error
+#     via (x-y)^2
+#     """
+#     errs = (np.subtract(pred, target))**2
+#     errs = np.sum(errs, axis=1)
+#     return np.sqrt(errs)
 
 def get_GRU_os(X):
     n,p = X.shape
@@ -224,8 +222,6 @@ def get_GRU_os(X):
     else:
         batch_size = 128
 
-    scaler = None # works better without scaler. data may need to be scaled before use.
-
     train_x, train_y, inputs, targets = compile_data(X, tw, pad=True, test_split = test_p)
     train_data = TensorDataset(torch.from_numpy(train_x), torch.from_numpy(train_y))
     data = TensorDataset(torch.from_numpy(inputs), torch.from_numpy(targets))
@@ -233,7 +229,7 @@ def get_GRU_os(X):
     data_loader = DataLoader(data, shuffle=False, batch_size=1, drop_last=True)
     lr = 0.001
     gru_model = train(train_loader, lr, device, batch_size, p, p, hidden_dim=64, EPOCHS=20, model_type="GRU")
-    gru_preds, targets_scaled, score = model_eval(gru_model, data_loader, targets, None, device)
+    gru_preds, targets_scaled, score = model_eval(gru_model, data_loader, targets, device)
 
     return score
 
@@ -257,7 +253,6 @@ def get_LSTM_os(X):
     else:
         batch_size = 128
 
-    scaler = None
     in_dim = p
     out_dim = p
 
@@ -270,6 +265,6 @@ def get_LSTM_os(X):
     lr = 0.001
     lstm_model = train(train_loader, lr, device, batch_size, in_dim, out_dim,
                         hidden_dim=64, EPOCHS=20, model_type="LSTM")
-    lstm_preds, targets_scaled, score = model_eval(lstm_model, data_loader, targets, scaler, device)
+    lstm_preds, targets_scaled, score = model_eval(lstm_model, data_loader, targets, device)
 
     return score

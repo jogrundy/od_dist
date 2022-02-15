@@ -5,6 +5,8 @@
 
 # As used in paper "Simple Models are Effective in Anomaly Detection in Multi-variate Time Series"
 
+This work was funded by the grant "Early detection of contact distress for enhanced performance monitoring and predictive inspection of machines" (EP/S005463/1) from the Engineering and Physical Sciences Research Council (EPSRC), UK.
+
 > pip install odds
 
 The work is done by the **OD** object. Import the 'OD' object as follows:
