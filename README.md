@@ -52,3 +52,5 @@ Valid strings for outlier algorithms:
 
 
 Hyperparameter table ![Hyperparameter table](images/table_hyperparameters.png)
+
+Hello!
